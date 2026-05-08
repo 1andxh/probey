@@ -10,7 +10,7 @@ async def get_quick_check(req: Request, url: str):
     client_ip = req.client.host if req.client else None
     key = f"rate_limit:{client_ip}"
 
-    if not rate_limiter.is_allowed(key, limit=5, window=60):
+    if not await rate_limiter.is_allowed(key, limit=5, window=60):
         raise RateLimitExceeded
 
     clean_url = normalize_public_url(url)
