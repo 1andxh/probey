@@ -47,7 +47,7 @@ services:
     container_name: pulse_redis
     restart: always
     ports:
-      - "6380:6380"
+      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
