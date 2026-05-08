@@ -1,6 +1,8 @@
-from fastapi import Request
-import httpx
 import time
+
+import httpx
+from fastapi import Request
+
 from ..core.redis import rate_limiter
 from ..exceptions import RateLimitExceeded
 from .utils import normalize_public_url
