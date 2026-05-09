@@ -4,7 +4,7 @@ import httpx
 from fastapi import Request
 
 from ..core.redis import rate_limiter
-from ..exceptions import RateLimitExceeded
+from ..exceptions import InvalidURL, RateLimitExceeded
 from .utils import normalize_public_url
 
 
@@ -16,6 +16,8 @@ async def get_quick_check(req: Request, url: str):
         raise RateLimitExceeded
 
     clean_url = normalize_public_url(url)
+    if not clean_url:
+        raise InvalidURL
 
     async with httpx.AsyncClient() as client:
         start_time = time.perf_counter()

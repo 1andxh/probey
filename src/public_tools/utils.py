@@ -12,6 +12,9 @@ def normalize_public_url(v: str | None) -> str:
     parsed = urlparse(v)
     if not parsed.netloc:
         return ""
+    if "." not in parsed.netloc:
+        v = v.replace(parsed.netloc, f"{parsed.netloc}.com", 1)
+        parsed = urlparse(v)
 
     path = parsed.path if parsed.path not in ["/", ""] else ""
 
