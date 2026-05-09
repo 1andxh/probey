@@ -1,4 +1,3 @@
-import pytest
 from src.public_tools.utils import normalize_public_url
 
 

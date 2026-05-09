@@ -4,7 +4,7 @@ import httpx
 from fastapi import Request
 
 from ..core.redis import rate_limiter
-from ..exceptions import RateLimitExceeded, InvalidURL
+from ..exceptions import InvalidURL, RateLimitExceeded
 from .utils import normalize_public_url
 
 
