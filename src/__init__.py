@@ -13,6 +13,7 @@ from src.db.session import engine
 from src.monitor.routes import monitor_router
 from src.probe.routes import probe_router
 from src.public_tools.routes import tool_router
+from src.auth.routes import auth_router
 
 from .exception_handler import (
     PulseError,
@@ -69,7 +70,7 @@ app.include_router(monitor_router, tags=["monitors"], prefix="/monitors")
 app.include_router(probe_router, tags=["probes"], prefix="/history")
 app.include_router(dashboard_router, tags=["dashboard"])
 app.include_router(tool_router, tags=["public-tools"])
-
+app.include_router(auth_router, tags=["authentication"], prefix="/auth")
 
 __all__ = [
     "health",
@@ -80,4 +81,5 @@ __all__ = [
     "dashboard_router",
     "probe_router",
     "tool_router",
+    "auth_router",
 ]
