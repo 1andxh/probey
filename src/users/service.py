@@ -5,13 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from .models import User
 from .utils import normalize_email
-from src.auth.utils import (
-    ACCESS_TOKEN_EXPIRY,
-    create_access_token,
-    decode_token,
-    hash_password,
-    verify_password,
-)
+from src.auth.utils import hash_password
 from .schemas import UserCreate
 
 REFRESH_TOKEN_EXPIRY_DAYS = 7
@@ -45,9 +39,10 @@ class UserService:
                 detail="Email already registered",
             )
 
-        new_user = User(email=email, hashed_password=user_data.password)
+        new_user = User(email=email, hashed_password=hash_password(user_data.password))
 
         session.add(new_user)
+
         try:
             await session.flush()
             await session.refresh(new_user)
@@ -58,3 +53,6 @@ class UserService:
                 detail="Email already registered",
             )
         return new_user
+
+
+user_service = UserService()
