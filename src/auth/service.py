@@ -96,3 +96,38 @@ class AuthService:
                 refresh=True,
             ),
         )
+
+    async def get_current_user(self, token: str, session: AsyncSession) -> User:
+        payload = decode_token(token)
+
+        if payload is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token",
+            )
+        if payload.get("refresh", False):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token required",
+            )
+
+        user_data = payload.get("user") or {}
+        email = user_data.get("email")
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token payload",
+            )
+
+        user = await service.get_user_by_email(email, session)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+            )
+
+        return user
+
+
+auth_service = AuthService()
