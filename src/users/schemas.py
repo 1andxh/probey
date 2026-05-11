@@ -1,5 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from .utils import normalize_email
+import uuid
+import datetime
 
 
 class UserCreate(BaseModel):
@@ -20,3 +22,12 @@ class UserLogin(BaseModel):
     @classmethod
     def normalize_user_email(cls, v):
         return normalize_email(v)
+
+
+class UserResponse(BaseModel):
+    id: uuid.UUID
+    email: str
+    is_verified: bool
+    created_at: datetime.datetime
+
+    model_config = ConfigDict(from_attributes=True)
