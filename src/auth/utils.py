@@ -28,7 +28,7 @@ def create_access_token(
 
     payload = {
         "user": user_data,
-        "expiry": now + expiry,
+        "exp": now + expiry,
         "jti": str(uuid.uuid4()),
         "refresh": refresh,
         "iat": now,
