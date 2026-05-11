@@ -18,7 +18,7 @@ def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
 
-def create_access_toke(
+def create_access_token(
     user_data: dict,
     expiry: timedelta = timedelta(seconds=ACCESS_TOKEN_EXPIRY),
     refresh: bool = False,
