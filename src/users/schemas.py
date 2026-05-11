@@ -20,9 +20,3 @@ class UserLogin(BaseModel):
     @classmethod
     def normalize_user_email(cls, v):
         return normalize_email(v)
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
