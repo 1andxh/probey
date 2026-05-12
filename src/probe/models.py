@@ -38,5 +38,7 @@ class Probe(Base):
 
     # relationships
     monitor: Mapped["Monitor"] = relationship(
-        "Monitor", back_populates="probes", lazy="selectin"
+        "Monitor",
+        back_populates="probes",
+        lazy="selectin",
     )
