@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from src.db.session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +8,9 @@ from src.users.models import User
 from src.users.schemas import UserCreate, UserLogin, UserResponse
 from src.users.service import user_service
 from .schemas import Token
+from .utils import oauth
 from typing import Annotated
+from src.config import settings
 
 auth_router = APIRouter()
 _security = HTTPBearer()
@@ -44,3 +46,9 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(_sec
 @auth_router.get("/me", response_model=UserResponse)
 async def get_user(current_user=Depends(get_current_user)):
     return current_user
+
+
+# oauth routes
+@auth_router.get("/google")
+async def login_via_google(request: Request):
+    return await oauth.google.authorize_redirect(request, settings.google_redirect_uri)  # type: ignore
