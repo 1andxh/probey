@@ -23,6 +23,8 @@ from .exception_handler import (
     validation_exception_handler,
 )
 
+from .middleware import register_middleware
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,17 +53,13 @@ app = FastAPI(
     openapi_url="/docs/openapi.json",
 )
 
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
 # exceptions
 app.add_exception_handler(PulseError, pulse_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, general_exception_handler)
 
+# middleware
+register_middleware(app)
 
 # routes
 app.include_router(sentry, tags=["logs"])
