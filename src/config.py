@@ -7,6 +7,11 @@ class Settings(BaseSettings):
     redis_url: str
     jwt_secret: str
     jwt_algorithm: str
+    # oauth
+    google_client_id: str
+    google_client_secret: str
+    google_redirect_url: str
+    middleware_secret: str
 
     model_config = SettingsConfigDict(
         env_file=".env", extra="ignore", case_sensitive=False
