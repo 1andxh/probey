@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .models import User
 from .utils import normalize_email
 from src.auth.utils import hash_password
-from .schemas import UserCreate
+from .schemas import UserCreate, GoogleUser
 
 REFRESH_TOKEN_EXPIRY_DAYS = 7
 
@@ -59,21 +59,42 @@ user_service = UserService()
 
 
 class OAuthService:
-    async def get_user_by_google_sub(self, google_sub: str, session: AsyncSession) -> User | None:
+    async def get_user_by_google_sub(
+        self, google_sub: str, session: AsyncSession
+    ) -> User | None:
         stmt = await session.execute(select(User).where(User.google_sub == google_sub))
         return stmt.scalar_one_or_none()
-    
-    async def handler_google_user(self, google_user: User, session: AsyncSession) -> User:
-        if not google_user.google_sub:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid Google payload: missing 'sub'."
-            )
-        exsting =  await self.get_user_by_google_sub(google_user.google_sub, session)
+
+    async def handler_google_user(
+        self, google_user: GoogleUser, session: AsyncSession
+    ) -> User:
+        exsting = await self.get_user_by_google_sub(google_user.google_sub, session)
         if exsting:
             return exsting
-        
+
         email_user = await user_service.get_user_by_email(google_user.email, session)
         if email_user:
-            
+            email_user.google_sub = google_user.google_sub
+            email_user.is_verified = True
+            email_user.auth_provider = "google"
 
+            await session.flush()
+            await session.refresh(email_user)
+            return email_user
+
+        new_user = User(
+            email=google_user.email,
+            full_name=google_user.name,
+            google_sub=google_user.google_sub,
+            is_verified=True,
+            auth_provider="google",
+            hashed_password=None,
+        )
+
+        session.add(new_user)
+        await session.flush()
+        await session.refresh(new_user)
+        return new_user
+
+
+oauth_service = OAuthService()

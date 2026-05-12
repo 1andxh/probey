@@ -36,7 +36,7 @@ class UserResponse(BaseModel):
 class GoogleUser(BaseModel):
     google_sub: str
     email: str
-    full_name: str
+    name: str
 
     class Config:
         from_attributes = True
