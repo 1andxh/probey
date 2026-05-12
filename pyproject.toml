@@ -10,6 +10,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "bcrypt>=5.0.0",
     "fastapi[standard]>=0.135.2",
+    "itsdangerous>=2.2.0",
     "pwdlib>=0.3.0",
     "pyjwt>=2.12.1",
     "pytest>=9.0.3",

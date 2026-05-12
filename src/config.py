@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     # oauth
     google_client_id: str
     google_client_secret: str
-    google_redirect_url: str
+    google_redirect_uri: str
     # middleware
     middleware_secret: str
     # frontend_url: str
