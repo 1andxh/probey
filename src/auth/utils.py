@@ -63,30 +63,3 @@ def decode_token(token: str) -> dict | None:
     except jwt.PyJWTError as e:
         logging.exception(e)
         return None
-
-
-def set_auth_cookies(response: Response, tokens: Token) -> None:
-    cookie_config = {
-        "httponly": True,
-        "samesite": "lax",
-        "secure": False,  # nts: always TRUE in prod
-    }
-    response.set_cookie(
-        key="access_token",
-        value=tokens.access_token,
-        max_age=ACCESS_TOKEN_EXPIRY,
-        **cookie_config,
-    )
-    response.set_cookie(
-        key="refresh_token",
-        value=tokens.refresh_token,
-        max_age=REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60,
-        **cookie_config,
-    )
-
-    # usage -- /callback
-    tokens = auth_service.generate_token_pair(user)  # type: ignore
-
-    redirect = RedirectResponse(url=f"{settings.frontend_url}/stats")  # type: ignore
-    set_auth_cookies(redirect, tokens)
-    # return redirect
