@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from authlib.integrations.starlette_client import OAuthError
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.users.models import User
@@ -10,13 +10,14 @@ from .utils import (
     REFRESH_TOKEN_EXPIRY_DAYS,
     decode_token,
 )
-from .schemas import Token
-from .utils import oauth
+from .schemas import Token, PasswordResetConfirm
+from .utils import oauth, hash_password
 from datetime import timedelta, datetime, timezone
 from src.users.service import UserService, oauth_service
 from src.core.redis import token_blocklist
 from src.users.schemas import GoogleUser
 from src.config import settings
+from src.mail.utils import mail_utils
 
 service = UserService()
 
@@ -173,6 +174,69 @@ class AuthService:
             url=f"{settings.frontend_url}/auth/callback?access_token={tokens.access_token}&refresh_token={tokens.refresh_token}"
         )
         return redirect
+
+    async def verify_user_account(self, token: str, session: AsyncSession):
+        token_data = mail_utils.decode_url_safe_token(
+            token, mail_utils.email_serializer
+        )
+        email = token_data.get("email")
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid verification token",
+            )
+
+        user = await service.get_user_by_email(email, session)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+        if user.is_verified:
+            return JSONResponse(
+                content={"message": "Account already verified"},
+                status_code=status.HTTP_200_OK,
+            )
+        await service._verify_user(user, session)
+        return {"message": "Account verified successfullly"}
+
+    async def password_reset(
+        self, token: str, password: PasswordResetConfirm, session: AsyncSession
+    ):
+        token_data = mail_utils.decode_url_safe_token(
+            token, mail_utils.password_reset_serializer
+        )
+        if token_data.get("type") != "password-reset":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid password reset token",
+            )
+        email = token_data.get("email")
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid password reset token",
+            )
+        user = await service.get_user_by_email(email, session)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Could not veirfy user"
+            )
+
+        if password.new_password != password.confirm_new_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match"
+            )
+        password_hash = hash_password(password.confirm_new_password)
+        await service._reset_password(
+            user,
+            password_hash,
+            session,
+        )
+        return JSONResponse(
+            content={"message": "Password reset successful"},
+            status_code=status.HTTP_200_OK,
+        )
 
 
 auth_service = AuthService()
