@@ -1,4 +1,6 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
+from fastapi.responses import RedirectResponse
+from authlib.integrations.starlette_client import OAuthError
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.users.models import User
 from .utils import (
@@ -9,9 +11,12 @@ from .utils import (
     decode_token,
 )
 from .schemas import Token
+from .utils import oauth
 from datetime import timedelta, datetime, timezone
-from src.users.service import UserService
+from src.users.service import UserService, oauth_service
 from src.core.redis import token_blocklist
+from src.users.schemas import GoogleUser
+from src.config import settings
 
 service = UserService()
 
@@ -143,6 +148,31 @@ class AuthService:
             )
 
         return user
+
+    async def oauth_callback(self, request: Request, session: AsyncSession):
+        try:
+            token = await oauth.google.authorize_access_token(request)  # type: ignore
+        except OAuthError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Google authentication failed",
+            )
+
+        userinfo = token.get("userinfo")
+        if not userinfo:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not retrieve user info from Google",
+            )
+
+        google_user = GoogleUser(**userinfo)
+        user = await oauth_service.handler_google_user(google_user, session)
+        tokens = auth_service.generate_token_pair(user)
+
+        redirect = RedirectResponse(
+            url=f"{settings.frontend_url}/auth/callback?access_token={tokens.access_token}&refresh_token={tokens.refresh_token}"
+        )
+        return redirect
 
 
 auth_service = AuthService()

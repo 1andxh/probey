@@ -8,7 +8,7 @@ from src.users.models import User
 from src.users.schemas import UserCreate, UserLogin, UserResponse
 from src.users.service import user_service
 from .schemas import Token
-from .utils import oauth
+
 from typing import Annotated
 from src.config import settings
 
@@ -52,3 +52,8 @@ async def get_user(current_user=Depends(get_current_user)):
 @auth_router.get("/google")
 async def login_via_google(request: Request):
     return await oauth.google.authorize_redirect(request, settings.google_redirect_uri)  # type: ignore
+
+
+@auth_router.get("/callback/google")
+async def google_callback(request: Request, session: _session):
+    return await auth_service.oauth_callback(request, session)

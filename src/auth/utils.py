@@ -51,26 +51,6 @@ def decode_token(token: str) -> dict | None:
         return None
 
 
-def set_auth_cookies(response: Response, tokens: Token) -> None:
-    cookie_config = {
-        "httponly": True,
-        "samesite": "lax",
-        "secure": False,  # nts: always TRUE in prod
-    }
-    response.set_cookie(
-        key="access_token",
-        value=tokens.access_token,
-        max_age=ACCESS_TOKEN_EXPIRY,
-        **cookie_config,
-    )
-    response.set_cookie(
-        key="refresh_token",
-        value=tokens.access_token,
-        max_age=REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60,
-        **cookie_config,
-    )
-
-
 # oauth
 oauth = OAuth()
 
