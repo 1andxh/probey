@@ -19,9 +19,9 @@ class MailService:
         dashboard_link = ""
         html_content = template.render(
             {
-                "user_name": new_user.full_name,
+                "user_name": new_user.name,
                 "link": dashboard_link,
-                "year": datetime.now(timezone.utc),
+                "year": datetime.now(timezone.utc).year,
             }
         )
         message = create_message(
@@ -36,15 +36,17 @@ class MailService:
             data={"email": new_user.email}
         )
         safe_token = quote(token, safe="")
-        verification_link = f"https://127.0.0.1:8000/auth/verify?token={safe_token}"
+        verification_link = (
+            f"https://127.0.0.1:8000/auth/verify-user?token={safe_token}"
+        )
 
         template = templates.template.get_template("verify_email.html")
 
         html_content = template.render(
             {
-                "user_name": new_user.full_name,
+                "user_name": new_user.name,
                 "link": verification_link,
-                "year": datetime.now(timezone.utc),
+                "year": datetime.now(timezone.utc).year,
             }
         )
 
@@ -59,9 +61,7 @@ class MailService:
         return {"message": "A link to verify your account has been sent to your email"}
 
     async def send_password_reset(self, email: PasswordResetRequest):
-        token = mail_utils.create_password_reset_token(
-            data={"email": PasswordResetRequest.email}
-        )
+        token = mail_utils.create_password_reset_token(data={"email": email.email})
         safe_token = quote(token, safe="")
         reset_link = f"https://127.0.0.1:8000/auth/reset-password?token={safe_token}"
 
@@ -82,6 +82,3 @@ class MailService:
         self.bg_task.add_task(mail.send_message, message)
 
         return {"message": "A link to reset your password has been sent to your mail"}
-
-
-# todo: add the bg_task and complete the routes.
