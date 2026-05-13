@@ -7,7 +7,10 @@ from .dependencies import get_current_verified_user, get_current_user
 from src.users.models import User
 from src.users.schemas import UserCreate, UserLogin, UserResponse
 from src.users.service import user_service
-from .schemas import Token
+from .schemas import Token, PasswordResetRequest, PasswordResetConfirm
+from src.mail.service import MailService
+from src.mail.dependency import get_mail_service
+from .utils import oauth
 
 from typing import Annotated
 from src.config import settings
@@ -15,13 +18,15 @@ from src.config import settings
 auth_router = APIRouter()
 _security = HTTPBearer()
 _session = Annotated[AsyncSession, Depends(get_session)]
+_service = Annotated[MailService, Depends(get_mail_service)]
 
 
 @auth_router.post(
     "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
 )
-async def register(payload: UserCreate, session: _session):
+async def register(payload: UserCreate, mail_service: _service, session: _session):
     new_user = await user_service.create_user(payload, session)
+    await mail_service.send_on_signup(new_user)
     return new_user
 
 
@@ -48,6 +53,22 @@ async def get_user(current_user=Depends(get_current_user)):
     return current_user
 
 
+# verification/password routes
+@auth_router.get("/verify-user")
+async def verify_user(token: str, session: _session):
+    return await auth_service.verify_user_account(token, session)
+
+
+@auth_router.post("/request-password-reset")
+async def request_password_reset(payload: PasswordResetRequest, service: _service):
+    return await service.send_password_reset(payload)
+
+
+@auth_router.post("/reset-password")
+async def reset_password(token: str, password: PasswordResetConfirm, session: _session):
+    return await auth_service.password_reset(token, password, session)
+
+
 # oauth routes
 @auth_router.get("/google")
 async def login_via_google(request: Request):
@@ -57,6 +78,3 @@ async def login_via_google(request: Request):
 @auth_router.get("/callback/google")
 async def google_callback(request: Request, session: _session):
     return await auth_service.oauth_callback(request, session)
-
-
-#
