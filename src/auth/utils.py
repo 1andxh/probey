@@ -1,10 +1,12 @@
 from src.config import settings
 from authlib.integrations.starlette_client import OAuth
+from fastapi import Response
 import uuid
 from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
 import logging
+from .schemas import Token
 
 JWT_SECRET = settings.jwt_secret
 JWT_ALGORITHM = settings.jwt_algorithm
@@ -47,6 +49,26 @@ def decode_token(token: str) -> dict | None:
     except jwt.PyJWTError as e:
         logging.exception(e)
         return None
+
+
+def set_auth_cookies(response: Response, tokens: Token) -> None:
+    cookie_config = {
+        "httponly": True,
+        "samesite": "lax",
+        "secure": False,  # nts: always TRUE in prod
+    }
+    response.set_cookie(
+        key="access_token",
+        value=tokens.access_token,
+        max_age=ACCESS_TOKEN_EXPIRY,
+        **cookie_config,
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=tokens.access_token,
+        max_age=REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60,
+        **cookie_config,
+    )
 
 
 # oauth
