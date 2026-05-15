@@ -1,11 +1,14 @@
-from fastapi import APIRouter, status, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.db.session import get_session
-from src.auth.dependencies import require_admin
-from src.users.models import User
-from typing import Annotated
-from .service import admin_service
 import uuid
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.auth.dependencies import require_admin
+from src.db.session import get_session
+from src.users.models import User
+
+from .service import admin_service
 
 admin = Annotated[User, Depends(require_admin)]
 session = Annotated[AsyncSession, Depends(get_session)]

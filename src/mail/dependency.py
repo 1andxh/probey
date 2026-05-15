@@ -1,4 +1,5 @@
-from fastapi import BackgroundTasks, Depends
+from fastapi import BackgroundTasks
+
 from .service import MailService
 
 

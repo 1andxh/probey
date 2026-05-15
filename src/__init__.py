@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import httpx
 from fastapi import FastAPI
 
+from src.auth.routes import auth_router
 from src.core.health import health
 from src.core.sentry import sentry
 from src.core.worker import worker
@@ -14,7 +15,6 @@ from src.db.session import engine
 from src.monitor.routes import monitor_router
 from src.probe.routes import probe_router
 from src.public_tools.routes import tool_router
-from src.auth.routes import auth_router
 from src.users.routes import admin_router
 
 from .exception_handler import (
@@ -24,7 +24,6 @@ from .exception_handler import (
     pulse_exception_handler,
     validation_exception_handler,
 )
-
 from .middleware import register_middleware
 
 

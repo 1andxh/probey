@@ -1,15 +1,18 @@
-from fastapi import status, HTTPException
-from sqlalchemy import select, func, cast, desc, Integer
+import uuid
+
+from fastapi import HTTPException, status
+from sqlalchemy import Integer, cast, desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import User
-from .utils import normalize_email
+
 from src.auth.utils import hash_password
-from .schemas import UserCreate, GoogleUser
+from src.exceptions import UserNotFoundError
 from src.monitor.models import Monitor
 from src.probe.models import Probe
-from src.exceptions import UserNotFoundError
-import uuid
+
+from .models import User
+from .schemas import GoogleUser, UserCreate
+from .utils import normalize_email
 
 
 class UserService:

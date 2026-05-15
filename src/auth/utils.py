@@ -1,12 +1,12 @@
-from src.config import settings
-from authlib.integrations.starlette_client import OAuth
-from fastapi import Response
+import logging
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+
 import bcrypt
 import jwt
-import logging
-from .schemas import Token
+from authlib.integrations.starlette_client import OAuth
+
+from src.config import settings
 
 JWT_SECRET = settings.jwt_secret
 JWT_ALGORITHM = settings.jwt_algorithm

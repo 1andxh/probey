@@ -4,13 +4,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db.session import get_session
-from .schemas import ProbeHistoryResponse
-from .services import ProbeService
+from src.auth.dependencies import get_current_verified_user
 from src.monitor.dependency import get_monitor_service
 from src.monitor.services import MonitorService
 from src.users.models import User
-from src.auth.dependencies import get_current_verified_user
+
+from ..db.session import get_session
+from .schemas import ProbeHistoryResponse
+from .services import ProbeService
 
 probe_router = APIRouter()
 

@@ -1,8 +1,9 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
-from .utils import normalize_email
-from .models import UserRole
 import uuid
-import datetime
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+from .models import UserRole
+from .utils import normalize_email
 
 
 class UserCreate(BaseModel):

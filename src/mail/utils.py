@@ -1,8 +1,10 @@
-from fastapi import HTTPException, status
-from src.config import settings
-from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 import logging
 from typing import Any
+
+from fastapi import HTTPException, status
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+
+from src.config import settings
 
 
 class MailUtils:

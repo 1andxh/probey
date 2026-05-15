@@ -1,15 +1,15 @@
 import uuid
 
-from sqlalchemy import desc, select, func, cast, Integer
+from sqlalchemy import Integer, cast, desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.logger import logger
 from src.monitor.schemas import MonitorCreate, MonitorUpdate
+from src.probe.models import Probe
 
 from ..exceptions import DuplicateMonitorError, MonitorNotFoundError
 from .models import Monitor
-from src.probe.models import Probe
 
 
 class MonitorService:
@@ -74,9 +74,7 @@ class MonitorService:
     async def get_user_stats(self, user_id: uuid.UUID) -> dict:
         monitor_stmt = select(
             func.count(Monitor.id).label("total_monitors"),
-            func.count(Monitor.id)
-            .filter(Monitor.is_active == True)
-            .label("active_monitors"),
+            func.count(Monitor.id).filter(Monitor.is_active).label("active_monitors"),
         ).where(Monitor.owner_id == user_id)
         stats = (await self.session.execute(monitor_stmt)).one()
 
@@ -98,7 +96,5 @@ class MonitorService:
         }
 
     async def get_all_active_monitors(self) -> list[Monitor]:
-        stmt = await self.session.execute(
-            select(Monitor).where(Monitor.is_active == True)
-        )
+        stmt = await self.session.execute(select(Monitor).where(Monitor.is_active))
         return list(stmt.scalars().all())

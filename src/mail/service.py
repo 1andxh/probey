@@ -1,13 +1,15 @@
-from fastapi import BackgroundTasks
-from .utils import mail_utils
-from src.templates import templates
-from .config import create_message, mail
 from datetime import datetime, timezone
-from src.users.models import User
-from src.auth.schemas import PasswordResetConfirm, PasswordResetRequest
-from src.users.schemas import UserCreate
 from urllib.parse import quote
-from pydantic import EmailStr
+
+from fastapi import BackgroundTasks
+
+from src.auth.schemas import PasswordResetRequest
+from src.templates import templates
+from src.users.models import User
+from src.users.schemas import UserCreate
+
+from .config import create_message, mail
+from .utils import mail_utils
 
 
 class MailService:

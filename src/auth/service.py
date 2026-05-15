@@ -1,23 +1,27 @@
-from fastapi import HTTPException, status, Request
-from fastapi.responses import RedirectResponse, JSONResponse
+from datetime import datetime, timedelta, timezone
+
 from authlib.integrations.starlette_client import OAuthError
+from fastapi import HTTPException, Request, status
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.config import settings
+from src.core.redis import token_blocklist
+from src.mail.utils import mail_utils
 from src.users.models import User
+from src.users.schemas import GoogleUser
+from src.users.service import UserService, oauth_service
+
+from .schemas import PasswordResetConfirm, Token
 from .utils import (
-    create_access_token,
-    verify_password,
     ACCESS_TOKEN_EXPIRY,
     REFRESH_TOKEN_EXPIRY_DAYS,
+    create_access_token,
     decode_token,
+    hash_password,
+    oauth,
+    verify_password,
 )
-from .schemas import Token, PasswordResetConfirm
-from .utils import oauth, hash_password
-from datetime import timedelta, datetime, timezone
-from src.users.service import UserService, oauth_service
-from src.core.redis import token_blocklist
-from src.users.schemas import GoogleUser
-from src.config import settings
-from src.mail.utils import mail_utils
 
 service = UserService()
 

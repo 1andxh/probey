@@ -4,8 +4,8 @@ from fastapi import HTTPException, status
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.probe.models import Probe
 from src.monitor.services import MonitorService
+from src.probe.models import Probe
 
 
 class ProbeService:

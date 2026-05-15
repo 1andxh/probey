@@ -1,12 +1,16 @@
 from __future__ import annotations
+
 import uuid
+from datetime import datetime
+from enum import Enum
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, DateTime, func, Boolean, Enum as SAEnum
-from datetime import datetime
-from typing import TYPE_CHECKING
+
 from src.db.base import Base
-from enum import Enum
 
 if TYPE_CHECKING:
     from src.monitor.models import Monitor

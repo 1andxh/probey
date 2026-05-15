@@ -3,11 +3,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
+from src.auth.dependencies import get_current_verified_user
+from src.users.models import User
+
 from .dependency import get_monitor_service
 from .schemas import MonitorCreate, MonitorRead, MonitorUpdate, StatsResponse
 from .services import MonitorService
-from src.auth.dependencies import get_current_verified_user
-from src.users.models import User
 
 _service = Annotated[MonitorService, Depends(get_monitor_service)]
 _current_user = Annotated[User, Depends(get_current_verified_user)]
