@@ -6,7 +6,8 @@ from fastapi import FastAPI
 
 from src.auth.routes import auth_router
 from src.core.health import health
-from src.core.sentry import sentry
+
+# from src.core.sentry import sentry
 from src.core.worker import worker
 
 # from src.dashboard.routes import dashboard_router
@@ -63,7 +64,7 @@ app.add_exception_handler(Exception, general_exception_handler)
 register_middleware(app)
 
 # routes
-app.include_router(sentry, tags=["logs"])
+# app.include_router(sentry, tags=["logs"])
 app.include_router(health, tags=["health-checks"])
 app.include_router(monitor_router, tags=["monitors"], prefix="/monitors")
 app.include_router(probe_router, tags=["probes"], prefix="/history")
