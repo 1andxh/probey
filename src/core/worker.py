@@ -13,55 +13,56 @@ from .checker import CheckResult, check_monitor, is_monitor_due
 
 
 async def worker(client: httpx.AsyncClient, app: FastAPI):
-    try:
-        while True:
-            now = datetime.now(timezone.utc)
+    while True:
+        try:
+            while True:
+                now = datetime.now(timezone.utc)
 
-            app.state.worker_last_seen = now
+                app.state.worker_last_seen = now
 
-            async with AsyncSessionLocal() as session:
-                service = MonitorService(session)
-                monitors = await service.get_all_monitors()
+                async with AsyncSessionLocal() as session:
+                    service = MonitorService(session)
+                    monitors = await service.get_all_active_monitors()
 
-                due_monitors = [
-                    monitor for monitor in monitors if is_monitor_due(monitor, now)
-                ]
-                if not due_monitors:
-                    logger.debug("no monitors due, skipping check cycle")
+                    due_monitors = [
+                        monitor for monitor in monitors if is_monitor_due(monitor, now)
+                    ]
+                    if not due_monitors:
+                        logger.debug("no monitors due, skipping check cycle")
 
-                    await asyncio.sleep(3)
-                    continue
-                logger.info(f"checking {len(due_monitors)} monitor(s)")
+                        await asyncio.sleep(3)
+                        continue
+                    logger.info(f"checking {len(due_monitors)} monitor(s)")
 
-                tasks = [check_monitor(monitor, client) for monitor in due_monitors]
+                    tasks = [check_monitor(monitor, client) for monitor in due_monitors]
 
-                results = await asyncio.gather(*tasks, return_exceptions=True)
+                    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                for monitor, result in zip(due_monitors, results):
-                    if isinstance(result, Exception):
-                        normalized = CheckResult(
-                            is_up=False, latency_ms=None, error_message=str(result)
+                    for monitor, result in zip(due_monitors, results):
+                        if isinstance(result, Exception):
+                            normalized = CheckResult(
+                                is_up=False, latency_ms=None, error_message=str(result)
+                            )
+                        else:
+                            normalized = result
+
+                        probe = Probe(
+                            monitor_id=monitor.id,
+                            latency_ms=normalized.latency_ms,
+                            is_up=normalized.is_up,
+                            error_message=normalized.error_message,
                         )
-                    else:
-                        normalized = result
+                        monitor.last_checked_at = now
+                        session.add(probe)
 
-                    probe = Probe(
-                        monitor_id=monitor.id,
-                        latency_ms=normalized.latency_ms,
-                        is_up=normalized.is_up,
-                        error_message=normalized.error_message,
-                    )
-                    monitor.last_checked_at = now
-                    session.add(probe)
+                    await session.commit()
+                    logger.info(f"Successfully processed {len(due_monitors)} probe(s)")
 
-                await session.commit()
-                logger.info(f"Successfully processed {len(due_monitors)} probe(s)")
+                await asyncio.sleep(1)
+        except asyncio.CancelledError:
+            logger.info("worker shutting down..")
+            raise
 
-            await asyncio.sleep(1)
-    except asyncio.CancelledError:
-        logger.info("worker shutting down..")
-        raise
-
-    except Exception:
-        logger.error("worker crashed", exc_info=True)
-        await asyncio.sleep(5)
+        except Exception:
+            logger.error("worker crashed", exc_info=True)
+            await asyncio.sleep(5)
