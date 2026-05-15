@@ -135,7 +135,7 @@ class AdminService:
             "average_response_time": round(float(stats.avg_response or 0), 2),
         }
 
-    async def get_user_with_monitor_count(self, session: AsyncSession) -> list[dict]:
+    async def get_users_with_monitor_count(self, session: AsyncSession) -> list[dict]:
         stmt = await session.execute(
             select(User, func.count(Monitor.id).label("monitor_count"))
             .outerjoin(Monitor, Monitor.owner_id == User.id)
