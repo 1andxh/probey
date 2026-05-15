@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import desc, select, func
+from sqlalchemy import desc, select, func, case, join
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +9,7 @@ from src.monitor.schemas import MonitorCreate, MonitorUpdate
 
 from ..exceptions import DuplicateMonitorError, MonitorNotFoundError
 from .models import Monitor
+from src.probe.models import Probe
 
 
 class MonitorService:
@@ -80,5 +81,27 @@ class MonitorService:
             ).where(Monitor.owner_id == user_id)
         )
         stats = stmt.one()
+        uptime_result = await self.session.execute(
+            select(
+                func.avg(
+                    case((Probe.is_up == True, 100), else_=0).label(
+                        "uptime_percentage"
+                    ),
+                    func.avg(Probe.latency_ms).label("avg_response_time"),
+                ).join(Monitor, Probe.monitor_id == Monitor.id)
+            ).where(Monitor.owner_id == user_id),
+        )
+        uptime = uptime_result.one()
 
-        return {}
+        return {
+            "total_monitors": stats.total_monitors,
+            "active_monitors": stats.active_monitors,
+            "uptime_percentage": round(float(uptime.uptime_percentage or 0), 2),
+            "average_response_time": round(float(uptime.avg_response_time or 0), 2),
+        }
+
+    async def get_all_active_monitors(self) -> list[Monitor]:
+        stmt = await self.session.execute(
+            select(Monitor).where(Monitor.is_active == True)
+        )
+        return list(stmt.scalars().all())
