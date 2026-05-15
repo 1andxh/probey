@@ -7,6 +7,7 @@ from src.auth.schemas import PasswordResetRequest
 from src.templates import templates
 from src.users.models import User
 from src.users.schemas import UserCreate
+from src.config import settings
 
 from .config import create_message, mail
 from .utils import mail_utils
@@ -18,17 +19,17 @@ class MailService:
 
     async def send_on_signup(self, new_user: User):
         template = templates.template.get_template("welcome.html")
-        dashboard_link = ""
+        dashboard_link = "/dashboard"
         html_content = template.render(
             {
                 "username": new_user.name,
-                "link": dashboard_link,
+                "link": settings.frontend_url + dashboard_link,
                 "year": datetime.now(timezone.utc).year,
             }
         )
         message = create_message(
             recipients=[new_user.email],
-            subject="Pulse",
+            subject="Probey",
             body=html_content,
         )
         self.bg_task.add_task(mail.send_message, message)
@@ -75,7 +76,7 @@ class MailService:
 
         message = create_message(
             recipients=[email.email],
-            subject="Reset Password - Pulse",
+            subject="Reset Password - Probey",
             body=html_content,
         )
 
