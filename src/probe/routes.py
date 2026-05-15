@@ -7,18 +7,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..db.session import get_session
 from .schemas import ProbeHistoryResponse
 from .services import ProbeService
+from src.monitor.dependency import get_monitor_service
+from src.monitor.services import MonitorService
 
 probe_router = APIRouter()
 
 
 async def _get_probe_service(
     session: AsyncSession = Depends(get_session),
+    monitor_service: MonitorService = Depends(get_monitor_service),
 ) -> ProbeService:
-    return ProbeService(session)
+    return ProbeService(session, monitor_service)
 
 
 @probe_router.get("/{monitor_id}/", response_model=ProbeHistoryResponse)
 async def get_probe_history(
-    monitor_id: uuid.UUID, service: Annotated[ProbeService, Depends(_get_probe_service)]
+    monitor_id: uuid.UUID,
+    service: Annotated[ProbeService, Depends(_get_probe_service)],
+    user_id: uuid.UUID,
 ):
-    return await service.get_latest_probes(monitor_id)
+    return await service.get_latest_probes(monitor_id, user_id)
