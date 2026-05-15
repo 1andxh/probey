@@ -14,6 +14,7 @@ from src.monitor.routes import monitor_router
 from src.probe.routes import probe_router
 from src.public_tools.routes import tool_router
 from src.auth.routes import auth_router
+from src.users.routes import admin_router
 
 from .exception_handler import (
     PulseError,
@@ -69,6 +70,8 @@ app.include_router(probe_router, tags=["probes"], prefix="/history")
 app.include_router(dashboard_router, tags=["dashboard"])
 app.include_router(tool_router, tags=["public-tools"])
 app.include_router(auth_router, tags=["authentication"], prefix="/auth")
+app.include_router(admin_router, tags=["admin"], prefix="/admin")
+
 
 __all__ = [
     "health",
@@ -80,4 +83,5 @@ __all__ = [
     "probe_router",
     "tool_router",
     "auth_router",
+    "admin_router",
 ]
