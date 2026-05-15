@@ -29,3 +29,8 @@ class RateLimitExceeded(PulseError):
 class InvalidURL(PulseError):
     def __init__(self) -> None:
         super().__init__("Enter a valid URL", status_code=status.HTTP_400_BAD_REQUEST)
+
+
+class UserNotFoundError(PulseError):
+    def __init__(self) -> None:
+        super().__init__("User not found", status_code=status.HTTP_404_NOT_FOUND)
