@@ -74,7 +74,7 @@ class MailService:
         )
 
         message = create_message(
-            recipients=[email],
+            recipients=[email.email],
             subject="Reset Password - Pulse",
             body=html_content,
         )
