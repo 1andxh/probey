@@ -1,5 +1,5 @@
 from fastapi import status, HTTPException
-from sqlalchemy import select, func, case, desc
+from sqlalchemy import select, func, cast, desc, Integer
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from .models import User
@@ -114,25 +114,22 @@ oauth_service = OAuthService()
 
 class AdminService:
     async def get_platform_stats(self, session: AsyncSession) -> dict:
-        users = await session.scalar(select(func.count(User.id)))
-        monitors = await session.scalar(select(func.count(Monitor.id)))
-        probes = await session.scalar(select(func.count(Probe.id)))
+        total_users = await session.scalar(select(func.count(User.id))) or 0
+        total_monitors = await session.scalar(select(func.count(Monitor.id))) or 0
+        total_probes = await session.scalar(select(func.count(Probe.id))) or 0
 
-        uptime_result = await session.execute(
-            select(
-                func.avg(case((Probe.is_up == True, 100), else_=0)).label("uptime"),
-                func.avg(Probe.latency_ms).label("avg_response"),
-            )
+        probe_stmt = select(
+            func.avg(cast(Probe.is_up, Integer)).label("uptime"),
+            func.avg(Probe.latency_ms).label("avg_latency"),
         )
-
-        stats = uptime_result.one()
+        probe_stats = (await session.execute(probe_stmt)).one()
 
         return {
-            "total_users": users,
-            "total_monitors": monitors,
-            "total_probes_recorded": probes,
-            "overall_uptime_percentage": round(float(stats.uptime or 0), 2),
-            "average_response_time": round(float(stats.avg_response or 0), 2),
+            "total_users": total_users,
+            "total_monitors": total_monitors,
+            "total_probes_recorded": total_probes,
+            "overall_uptime_percentage": round((probe_stats.uptime or 0.0) * 100, 2),
+            "average_response_time": round(float(probe_stats.avg_latency or 0), 2),
         }
 
     async def get_users_with_monitor_count(self, session: AsyncSession) -> list[dict]:
