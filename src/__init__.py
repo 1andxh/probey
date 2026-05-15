@@ -7,7 +7,8 @@ from fastapi import FastAPI
 from src.core.health import health
 from src.core.sentry import sentry
 from src.core.worker import worker
-from src.dashboard.routes import dashboard_router
+
+# from src.dashboard.routes import dashboard_router
 from src.db.base import Base as Base
 from src.db.session import engine
 from src.monitor.routes import monitor_router
@@ -67,7 +68,7 @@ app.include_router(sentry, tags=["logs"])
 app.include_router(health, tags=["health-checks"])
 app.include_router(monitor_router, tags=["monitors"], prefix="/monitors")
 app.include_router(probe_router, tags=["probes"], prefix="/history")
-app.include_router(dashboard_router, tags=["dashboard"])
+# app.include_router(dashboard_router, tags=["dashboard"])
 app.include_router(tool_router, tags=["public-tools"])
 app.include_router(auth_router, tags=["authentication"], prefix="/auth")
 app.include_router(admin_router, tags=["admin"], prefix="/admin")
@@ -79,7 +80,7 @@ __all__ = [
     "worker",
     "engine",
     "monitor_router",
-    "dashboard_router",
+    # "dashboard_router",
     "probe_router",
     "tool_router",
     "auth_router",
