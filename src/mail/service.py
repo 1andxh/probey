@@ -18,48 +18,26 @@ class MailService:
         self.bg_task = bg_task
 
     async def send_on_signup(self, new_user: User):
-        template = templates.template.get_template("welcome.html")
-        dashboard_link = "/dashboard"
-        html_content = template.render(
-            {
-                "username": new_user.name,
-                "dashboard_link": settings.frontend_url + dashboard_link,
-                "year": datetime.now(timezone.utc).year,
-            }
-        )
-        message = create_message(
-            recipients=[new_user.email],
-            subject="Probey",
-            body=html_content,
-        )
-        self.bg_task.add_task(mail.send_message, message)
-
-    async def send_verification_mail(self, new_user: UserCreate):
         token = mail_utils.create_email_verification_token(
             data={"email": new_user.email}
         )
         safe_token = quote(token, safe="")
-        verification_link = f"https://127.0.0.1:8000/auth/verify-user/{safe_token}"
+        verification_link = f"{settings.api_url}/auth/verify-user/{safe_token}"
 
-        template = templates.template.get_template("verify_email.html")
-
+        template = templates.template.get_template("welcome.html")
         html_content = template.render(
             {
-                "user_name": new_user.name,
-                "link": verification_link,
+                "username": new_user.name,
+                "verification_link": verification_link,
                 "year": datetime.now(timezone.utc).year,
             }
         )
-
         message = create_message(
             recipients=[new_user.email],
-            subject="Account Verification - Pulse",
+            subject="Welcome to Probey — verify your email",
             body=html_content,
         )
-
         self.bg_task.add_task(mail.send_message, message)
-
-        return {"message": "A link to verify your account has been sent to your email"}
 
     async def send_password_reset(self, email: PasswordResetRequest):
         token = mail_utils.create_password_reset_token(data={"email": email.email})
