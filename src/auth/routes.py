@@ -12,7 +12,7 @@ from src.users.schemas import UserCreate, UserLogin, UserResponse
 from src.users.service import user_service
 
 from .dependencies import get_current_user
-from .schemas import PasswordResetConfirm, PasswordResetRequest, Token, TokenResponse
+from .schemas import PasswordResetConfirm, PasswordResetRequest, Token
 from .service import auth_service
 from .utils import oauth
 

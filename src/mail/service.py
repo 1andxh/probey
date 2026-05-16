@@ -7,7 +7,6 @@ from src.auth.schemas import PasswordResetRequest
 from src.config import settings
 from src.templates import templates
 from src.users.models import User
-from src.users.schemas import UserCreate
 
 from .config import create_message, mail
 from .utils import mail_utils
