@@ -38,11 +38,14 @@ def custom_logger():
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
-    file_handler = RotatingFileHandler(
-        "pulse.logs", maxBytes=5 * 1024 * 1024, backupCount=5
-    )
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    try:
+        file_handler = RotatingFileHandler(
+            "pulse.logs", maxBytes=5 * 1024 * 1024, backupCount=5
+        )
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except OSError as exc:
+        logger.warning("file logging disabled: %s", exc)
 
     return logger
 
