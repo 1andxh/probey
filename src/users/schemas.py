@@ -39,8 +39,8 @@ class UserResponse(BaseModel):
 
 
 class GoogleUser(BaseModel):
-    google_sub: str
+    google_sub: str = Field(alias="sub")
     email: str
     name: str
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
