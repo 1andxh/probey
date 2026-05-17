@@ -103,7 +103,7 @@ class OAuthService:
 
         new_user = User(
             email=google_user.email,
-            full_name=google_user.name,
+            name=google_user.name,
             google_sub=google_user.google_sub,
             is_verified=True,
             auth_provider="google",
