@@ -8,7 +8,13 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "alembic>=1.18.4",
     "asyncpg>=0.31.0",
+    "authlib>=1.7.2",
+    "bcrypt>=5.0.0",
+    "fastapi-mail>=1.6.4",
     "fastapi[standard]>=0.135.2",
+    "itsdangerous>=2.2.0",
+    "pwdlib>=0.3.0",
+    "pyjwt>=2.12.1",
     "pytest>=9.0.3",
     "pytest-asyncio>=1.3.0",
     "redis>=7.4.0",
@@ -26,11 +32,12 @@ dev = [
 
 [tool.ruff]
 target-version = "py313"
-line-length = 88
+line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 ignore = []
+extend-per-file-ignores = { "alembic/versions/*.py" = ["E501"] }
 
 [tool.ruff.format]
 quote-style = "double"

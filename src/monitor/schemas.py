@@ -69,3 +69,10 @@ class MonitorRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class StatsResponse(BaseModel):
+    total_monitors: int
+    active_monitors: int
+    uptime_percentage: float
+    average_response_time: float

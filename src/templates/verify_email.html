@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 style="font-family: 'Courier New', monospace; color: #1a1915; margin-top: 0; font-weight: 500; letter-spacing: 0.05em;">
+  Verify your email, {{ username }}
+</h2>
+
+<p style="font-family: 'Courier New', monospace; color: #555450; line-height: 1.7; font-size: 14px;">
+  You're almost set. Confirm your email address to activate your Probey account and start monitoring your services.
+</p>
+
+<div style="text-align: center; margin: 32px 0;">
+  <a href="{{ link }}"
+     style="font-family: 'Courier New', monospace; background-color: #1a1915; color: #f4f3ef; padding: 12px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; display: inline-block; font-weight: 400;">
+    Verify Email
+  </a>
+</div>
+
+<p style="font-family: 'Courier New', monospace; color: #999892; font-size: 12px; line-height: 1.7;">
+  If the button doesn't work, copy and paste this link:
+  <br>
+  <a href="{{ link }}" style="color: #555450; word-break: break-all;">{{ link }}</a>
+</p>
+
+<hr style="border: 0; border-top: 1px solid #c8c5bc; margin: 28px 0;">
+
+<p style="font-family: 'Courier New', monospace; color: #999892; font-size: 12px; letter-spacing: 0.04em;">
+  Didn't sign up for Probey? You can safely ignore this email.
+</p>
+{% endblock %}
