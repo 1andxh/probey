@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -89,3 +90,10 @@ async def login_via_google(request: Request):
 @auth_router.get("/callback/google")
 async def google_callback(request: Request, session: _session):
     return await auth_service.oauth_callback(request, session)
+
+
+@auth_router.get("/callback")
+async def frontend_oauth_callback_fallback(request: Request):
+    query = request.url.query
+    separator = "?" if query else ""
+    return RedirectResponse(f"{settings.frontend_url}/auth/callback{separator}{query}")
