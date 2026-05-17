@@ -157,10 +157,10 @@ class AuthService:
     async def oauth_callback(self, request: Request, session: AsyncSession):
         try:
             token = await oauth.google.authorize_access_token(request)  # type: ignore
-        except OAuthError:
+        except OAuthError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Google authentication failed",
+                detail=f"Google authentication failed: {str(e)}",
             )
 
         userinfo = token.get("userinfo")
